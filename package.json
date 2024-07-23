@@ -1,6 +1,6 @@
 {
   "name": "next-navlink",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A customizable NavLink component for Next.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,16 +8,24 @@
     "build": "tsc"
   },
   "keywords": [
-    "react",
     "nextjs",
     "navigation",
-    "link"
+    "react",
+    "link",
+    "navlink"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Walter0b/Nextjs-NavLink.git"
+  },
+  "files": [
+    "dist"
   ],
   "author": "WalterOb",
   "license": "ME",
   "peerDependencies": {
-    "next": "^13.0.0",
-    "react": "^18.0.0"
+    "react": "^16.x || ^17.x || ^18.x",
+    "next": "^12.x || ^13.x"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
