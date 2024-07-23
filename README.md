@@ -36,8 +36,8 @@ bun install next-navlink
 Here's a basic example of how to use the `NavLink` component in your Next.js project:
 
 ```tsx
-import React from 'react'
-import NavLink from 'next-navlink'
+import React from "react";
+import NavLink from "next-navlink";
 
 const Navbar = () => {
   return (
@@ -48,31 +48,163 @@ const Navbar = () => {
       <NavLink to="/about" activeClassName="active" className="nav-link">
         About
       </NavLink>
-      <NavLink to="/contact" activeClassName="active" className="nav-link" redirection={false}>
+      <NavLink
+        to="/contact"
+        activeClassName="active"
+        className="nav-link"
+        redirection={false}
+      >
         Contact
       </NavLink>
     </nav>
-  )
+  );
+};
+
+export default Navbar;
+```
+
+Sure, I can help you update the `README.md` to include the additional props `replace`, `scroll`, and `prefetch` for the `NavLink` component. Here's how these props can be incorporated into your component and the updated documentation for these features:
+
+### Updated NavLink Component
+
+First, let's update the `NavLink` component to support the new props `replace`, `scroll`, and `prefetch`.
+
+```typescript
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+type MatchMode = "exact" | "includes" | "startsWith";
+
+interface NavLinkProps {
+  children?: React.ReactNode | ((isActive: boolean) => React.ReactNode);
+  activeClassName?: string;
+  conditionalClassName?: string;
+  className?: string;
+  to: string;
+  redirection?: boolean;
+  id?: string;
+  onClick?: () => void;
+  matchMode?: MatchMode;
+  replace?: boolean;
+  scroll?: boolean;
+  prefetch?: boolean; 
 }
 
-export default Navbar
+const NavLink: React.FC<NavLinkProps> = React.memo(
+  ({
+    to,
+    redirection = true,
+    id,
+    children,
+    conditionalClassName = "",
+    className,
+    activeClassName = "active",
+    onClick,
+    matchMode = "includes",
+    replace = false,
+    scroll = true,
+    prefetch = true,
+  }) => {
+    const pathname = usePathname();
+
+    const isActive = (() => {
+      switch (matchMode) {
+        case "exact":
+          return pathname === to;
+        case "startsWith":
+          return pathname.startsWith(to);
+        case "includes":
+        default:
+          return pathname.includes(to);
+      }
+    })();
+
+    const renderChildren =
+      typeof children === "function" ? children(isActive) : children;
+
+    const commonProps = {
+      id,
+      className: `${className} ${
+        isActive ? activeClassName : conditionalClassName
+      } nav_links`,
+      onClick: onClick,
+    };
+
+    if (!redirection) {
+      return <span {...commonProps}>{renderChildren}</span>;
+    }
+
+    return (
+      <Link
+        href={to}
+        replace={replace}
+        scroll={scroll}
+        prefetch={prefetch}
+        {...commonProps}
+      >
+        {renderChildren}
+      </Link>
+    );
+  }
+);
+
+NavLink.displayName = "NavLink";
+
+export default NavLink;
 ```
 
 ## Props
 
 The `NavLink` component accepts the following props:
 
-| Prop                  | Type                                                   | Description                                                                                                                                   | Default         |
-|-----------------------|--------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `children`            | `React.ReactNode` or `(isActive: boolean) => React.ReactNode` | The content to be rendered inside the link. It can be a React node or a function that returns a React node, allowing customization based on the active state. | -               |
-| `activeClassName`     | `string`                                               | The class name to apply when the link is active.                                                                                              | `active`        |
-| `conditionalClassName`| `string`                                               | The class name to apply when the link is not active.                                                                                          | `''`            |
-| `className`           | `string`                                               | Additional class names to apply to the link.                                                                                                  | `''`            |
-| `to`                  | `string`                                               | The target path to navigate to when the link is clicked.                                                                                      | -               |
-| `redirection`         | `boolean`                                              | If `true`, the link redirects to the specified path. If `false`, it renders a `<span>` instead, disabling the navigation.                     | `true`          |
-| `id`                  | `string`                                               | The `id` attribute to apply to the link element.                                                                                               | -               |
-| `onClick`             | `() => void`                                           | A function to call when the link is clicked.                                                                                                  | -               |
-| `matchMode`           | `'exact' | 'includes' | 'startsWith'`                     | Determines the matching behavior for the active state.                                                                                        | `'includes'`    |
+| Prop                   | Type                                                      | Description                                                                                                                                   | Default         |
+|------------------------|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
+| `children`             | `React.ReactNode` or `(isActive: boolean) => React.ReactNode` | The content to be rendered inside the link. It can be a React node or a function that returns a React node, allowing customization based on the active state. | -               |
+| `activeClassName`      | `string`                                                  | The class name to apply when the link is active.                                                                                              | `active`        |
+| `conditionalClassName` | `string`                                                  | The class name to apply when the link is not active.                                                                                          | `''`            |
+| `className`            | `string`                                                  | Additional class names to apply to the link.                                                                                                  | `''`            |
+| `to`                   | `string`                                                  | The target path to navigate to when the link is clicked.                                                                                      | -               |
+| `redirection`          | `boolean`                                                 | If `true`, the link redirects to the specified path. If `false`, it renders a `<span>` instead, disabling the navigation.                     | `true`          |
+| `id`                   | `string`                                                  | The `id` attribute to apply to the link element.                                                                                               | -               |
+| `onClick`              | `() => void`                                              | A function to call when the link is clicked.                                                                                                  | -               |
+| `matchMode`            | `'exact' \| 'includes' \| 'startsWith'`                   | Determines the matching behavior for the active state.                                                                                        | `'includes'`    |
+| `replace`              | `boolean`                                                 | If `true`, replaces the current history state instead of adding a new URL to the stack.                                                       | `false`         |
+| `scroll`               | `boolean`                                                 | If `true`, scrolls to the top of the page after navigation.                                                                                   | `true`          |
+| `prefetch`             | `boolean`                                                 | If `true`, prefetches the page in the background when the link is in the viewport.                                                            | `true`          |
+
+### Link Props
+
+The `replace`, `scroll`, and `prefetch` props correspond to the behavior of the Next.js `Link` component. For more information, see the [Next.js Link Component documentation](https://nextjs.org/docs/pages/api-reference/components/link).
+
+- **`replace`**: This prop controls whether the navigation should replace the current history entry instead of adding a new one. This is useful when you want to navigate within your app without adding a new entry to the browser's history stack.
+
+- **`scroll`**: This prop determines whether the page should scroll to the top when navigating to the new route. Setting it to `false` can be useful when you want to maintain scroll position between navigations.
+
+- **`prefetch`**: This prop enables prefetching the linked page in the background. Prefetching helps in improving navigation speed by loading the linked page ahead of time.
+
+## Examples
+
+### Using the `replace`, `scroll`, and `prefetch` Props
+
+Here's an example of how to use the new props with `NavLink`:
+
+```tsx
+<NavLink
+  to="/about"
+  activeClassName="active"
+  className="nav-link"
+  replace={true}
+  scroll={false}
+  prefetch={true}
+>
+  About Us
+</NavLink>
+```
+
+- **`replace`**: This will replace the current history entry with `/about`, so pressing the back button won't go back to the current page.
+- **`scroll`**: This prevents the page from scrolling to the top when navigating to `/about`.
+- **`prefetch`**: This prefetches the `/about` page, improving the load time when the user clicks the link.
 
 ### `matchMode` Options
 
@@ -91,9 +223,7 @@ The `NavLink` component supports conditional rendering of children based on the 
 ```tsx
 <NavLink to="/profile" className="nav-link">
   {(isActive) => (
-    <span>
-      {isActive ? 'Your Profile (Active)' : 'Your Profile'}
-    </span>
+    <span>{isActive ? "Your Profile (Active)" : "Your Profile"}</span>
   )}
 </NavLink>
 ```
@@ -130,7 +260,7 @@ You can handle click events by passing an `onClick` prop:
 ```tsx
 <NavLink
   to="/logout"
-  onClick={() => console.log('Logging out')}
+  onClick={() => console.log("Logging out")}
   className="nav-link"
 >
   Logout
@@ -144,7 +274,12 @@ You can handle click events by passing an `onClick` prop:
 To ensure the link is active only when the URL matches exactly, use the `matchMode="exact"`:
 
 ```tsx
-<NavLink to="/log" matchMode="exact" activeClassName="active" className="nav-link">
+<NavLink
+  to="/log"
+  matchMode="exact"
+  activeClassName="active"
+  className="nav-link"
+>
   Log
 </NavLink>
 ```
@@ -156,7 +291,12 @@ To ensure the link is active only when the URL matches exactly, use the `matchMo
 To activate the link for any path that starts with the specified path, use `matchMode="startsWith"`:
 
 ```tsx
-<NavLink to="/blog" matchMode="startsWith" activeClassName="active" className="nav-link">
+<NavLink
+  to="/blog"
+  matchMode="startsWith"
+  activeClassName="active"
+  className="nav-link"
+>
   Blog
 </NavLink>
 ```

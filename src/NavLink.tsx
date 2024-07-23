@@ -1,6 +1,6 @@
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type MatchMode = 'exact' | 'includes' | 'startsWith';
 
@@ -14,6 +14,9 @@ interface NavLinkProps {
     id?: string;
     onClick?: () => void;
     matchMode?: MatchMode;
+    replace?: boolean; 
+    scroll?: boolean;  
+    prefetch?: boolean; 
 }
 
 const NavLink: React.FC<NavLinkProps> = React.memo(({
@@ -26,6 +29,9 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({
     activeClassName = 'active',
     onClick,
     matchMode = 'includes',
+    replace = false,
+    scroll = true,
+    prefetch = true,
 }) => {
     const pathname = usePathname();
 
@@ -53,7 +59,17 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({
         return <span {...commonProps}>{renderChildren}</span>;
     }
 
-    return <Link href={to} {...commonProps}>{renderChildren}</Link>;
+    return (
+        <Link
+            href={to}
+            replace={replace}
+            scroll={scroll}
+            prefetch={prefetch}
+            {...commonProps}
+        >
+            {renderChildren}
+        </Link>
+    );
 });
 
 NavLink.displayName = 'NavLink';
