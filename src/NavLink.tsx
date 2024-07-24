@@ -14,9 +14,9 @@ interface NavLinkProps {
     id?: string;
     onClick?: () => void;
     matchMode?: MatchMode;
-    replace?: boolean; 
-    scroll?: boolean;  
-    prefetch?: boolean; 
+    replace?: boolean;
+    scroll?: boolean;
+    prefetch?: boolean;
 }
 
 const NavLink: React.FC<NavLinkProps> = React.memo(({
