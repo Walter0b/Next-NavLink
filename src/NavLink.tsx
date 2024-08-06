@@ -7,7 +7,7 @@ type MatchMode = 'exact' | 'includes' | 'startsWith';
 interface NavLinkProps {
     children: React.ReactNode | ((isActive: boolean) => React.ReactNode);
     activeClassName?: string;
-    conditionalClassName?: string;
+    inActiveClassName?: string;
     className?: string;
     to: string;
     redirection?: boolean;
@@ -30,7 +30,7 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({
     redirection = true,
     id,
     children,
-    conditionalClassName = '',
+    inActiveClassName = '',
     className = '',
     activeClassName = 'active',
     onClick,
@@ -90,7 +90,7 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({
 
     const commonProps = {
         id,
-        className: `${className} ${isActive ? activeClassName : conditionalClassName} nav_links`.trim(),
+        className: `${className} ${isActive ? activeClassName : inActiveClassName} nav_links`.trim(),
         onClick: handleClick,
         style: isActive ? activeStyle : inactiveStyle,
         'data-testid': testId,

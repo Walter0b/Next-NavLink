@@ -71,26 +71,26 @@ Sure, I can help you update the `README.md` to include the additional props `rep
 
 The `NavLink` component accepts the following props:
 
-| Prop                   | Type                                                      | Description                                                                                                                                      | Default         |
-|------------------------|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `children`             | `React.ReactNode` or `(isActive: boolean) => React.ReactNode` | The content to be rendered inside the link. It can be a React node or a function that returns a React node, allowing customization based on the active state. | -               |
-| `activeClassName`      | `string`                                                  | The class name to apply when the link is active.                                                                                                 | `active`        |
-| `conditionalClassName` | `string`                                                  | The class name to apply when the link is not active.                                                                                             | `''`            |
-| `className`            | `string`                                                  | Additional class names to apply to the link.                                                                                                     | `''`            |
-| `to`                   | `string`                                                  | The target path to navigate to when the link is clicked.                                                                                         | -               |
-| `redirection`          | `boolean`                                                 | If `true`, the link redirects to the specified path. If `false`, it renders a `<span>` instead, disabling the navigation.                        | `true`          |
-| `id`                   | `string`                                                  | The `id` attribute to apply to the link element.                                                                                                 | -               |
-| `onClick`              | `() => void`                                              | A function to call when the link is clicked.                                                                                                     | -               |
-| `matchMode`            | `'exact' \| 'includes' \| 'startsWith'`                   | Determines the matching behavior for the active state.                                                                                           | `'includes'`    |
-| `replace`              | `boolean`                                                 | If `true`, replaces the current history state instead of adding a new URL to the stack.                                                          | `false`         |
-| `scroll`               | `boolean`                                                 | If `true`, scrolls to the top of the page after navigation.                                                                                      | `true`          |
-| `prefetch`             | `boolean`                                                 | If `true`, prefetches the page in the background when the link is in the viewport.                                                               | `true`          |
-| `isExternal`           | `boolean`                                                 | If `true`, the link will open in a new tab and will be treated as an external link.                                                              | `false`         |
-| `aria`                 | `{ [key: string]: string }`                               | An object of ARIA attributes to apply to the link element.                                                                                       | -               |
-| `testId`               | `string`                                                  | A test ID to apply to the link element for testing purposes.                                                                                     | -               |
-| `disabled`             | `boolean`                                                 | If `true`, disables the link, preventing navigation and click events.                                                                            | `false`         |
-| `activeStyle`          | `React.CSSProperties`                                     | An object containing inline styles to apply when the link is active.                                                                             | -               |
-| `inactiveStyle`        | `React.CSSProperties`                                     | An object containing inline styles to apply when the link is inactive.                                                                           | -               |
+| Prop                | Type                                                          | Description                                                                                                                                                   | Default      |
+| ------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `children`          | `React.ReactNode` or `(isActive: boolean) => React.ReactNode` | The content to be rendered inside the link. It can be a React node or a function that returns a React node, allowing customization based on the active state. | -            |
+| `activeClassName`   | `string`                                                      | The class name to apply when the link is active.                                                                                                              | `active`     |
+| `inActiveClassName` | `string`                                                      | The class name to apply when the link is not active.                                                                                                          | `''`         |
+| `className`         | `string`                                                      | Additional class names to apply to the link.                                                                                                                  | `''`         |
+| `to`                | `string`                                                      | The target path to navigate to when the link is clicked.                                                                                                      | -            |
+| `redirection`       | `boolean`                                                     | If `true`, the link redirects to the specified path. If `false`, it renders a `<span>` instead, disabling the navigation.                                     | `true`       |
+| `id`                | `string`                                                      | The `id` attribute to apply to the link element.                                                                                                              | -            |
+| `onClick`           | `() => void`                                                  | A function to call when the link is clicked.                                                                                                                  | -            |
+| `matchMode`         | `'exact' \| 'includes' \| 'startsWith'`                       | Determines the matching behavior for the active state.                                                                                                        | `'includes'` |
+| `replace`           | `boolean`                                                     | If `true`, replaces the current history state instead of adding a new URL to the stack.                                                                       | `false`      |
+| `scroll`            | `boolean`                                                     | If `true`, scrolls to the top of the page after navigation.                                                                                                   | `true`       |
+| `prefetch`          | `boolean`                                                     | If `true`, prefetches the page in the background when the link is in the viewport.                                                                            | `true`       |
+| `isExternal`        | `boolean`                                                     | If `true`, the link will open in a new tab and will be treated as an external link.                                                                           | `false`      |
+| `aria`              | `{ [key: string]: string }`                                   | An object of ARIA attributes to apply to the link element.                                                                                                    | -            |
+| `testId`            | `string`                                                      | A test ID to apply to the link element for testing purposes.                                                                                                  | -            |
+| `disabled`          | `boolean`                                                     | If `true`, disables the link, preventing navigation and click events.                                                                                         | `false`      |
+| `activeStyle`       | `React.CSSProperties`                                         | An object containing inline styles to apply when the link is active.                                                                                          | -            |
+| `inactiveStyle`     | `React.CSSProperties`                                         | An object containing inline styles to apply when the link is inactive.                                                                                        | -            |
 
 ### Link Props
 
@@ -149,13 +149,13 @@ The `NavLink` component supports conditional rendering of children based on the 
 
 ### Styling Links
 
-You can easily style active and inactive links using the `activeClassName` and `conditionalClassName` props:
+You can easily style active and inactive links using the `activeClassName` and `inActiveClassName` props:
 
 ```tsx
 <NavLink
   to="/dashboard"
   activeClassName="text-bold text-primary"
-  conditionalClassName="text-muted"
+  inActiveClassName="text-muted"
   className="nav-link"
 >
   Dashboard
