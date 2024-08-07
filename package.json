@@ -1,6 +1,6 @@
 {
   "name": "next-navlink",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A customizable NavLink component for Next.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
