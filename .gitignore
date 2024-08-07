@@ -3,3 +3,4 @@
 .npmignore
 .DS_Store
 tree.py
+bun.lockb
