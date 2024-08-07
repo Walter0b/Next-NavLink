@@ -1,0 +1,40 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16" 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test # Ensure your tests pass before publishing
+
+      - name: Bump version, build, and publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm version patch # Or use 'minor' or 'major' depending on your versioning strategy
+          npm run build # If you have a build step
+          npm publish
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git push --follow-tags

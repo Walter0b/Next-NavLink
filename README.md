@@ -240,4 +240,5 @@ Contributions are welcome! If you have suggestions, bug reports, or feature requ
 
 ## License
 
-Do Whatever
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
