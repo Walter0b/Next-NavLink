@@ -2,3 +2,4 @@
 /dist
 .npmignore
 .DS_Store
+tree.py
