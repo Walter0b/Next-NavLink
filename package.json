@@ -1,9 +1,9 @@
 {
   "name": "next-navlink",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A customizable NavLink component for Next.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest"
