@@ -91,6 +91,7 @@ The `NavLink` component accepts the following props:
 | `disabled`          | `boolean`                                                     | If `true`, disables the link, preventing navigation and click events.                                                                                         | `false`      |
 | `activeStyle`       | `React.CSSProperties`                                         | An object containing inline styles to apply when the link is active.                                                                                          | -            |
 | `inactiveStyle`     | `React.CSSProperties`                                         | An object containing inline styles to apply when the link is inactive.                                                                                        | -            |
+| `customActiveUrl`     | `String`                                         | An The link will be considered active when the current pathname matches this URL.                                                                                        | -            |
 
 ### Link Props
 

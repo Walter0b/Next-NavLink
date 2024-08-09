@@ -2,7 +2,6 @@ import React, { useMemo, ReactElement, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-type MatchMode = 'exact' | 'includes' | 'startsWith';
 
 interface NavLinkProps {
     children: React.ReactNode | ((isActive: boolean) => React.ReactNode);
@@ -13,7 +12,7 @@ interface NavLinkProps {
     redirection?: boolean;
     id?: string;
     onClick?: () => void;
-    matchMode?: MatchMode;
+    matchMode?: 'exact' | 'includes' | 'startsWith';
     replace?: boolean;
     scroll?: boolean;
     prefetch?: boolean;
@@ -23,6 +22,7 @@ interface NavLinkProps {
     disabled?: boolean;
     activeStyle?: React.CSSProperties;
     inactiveStyle?: React.CSSProperties;
+    customActiveUrl?: string;
 }
 
 const NavLink: React.FC<NavLinkProps> = React.memo(({
@@ -44,21 +44,24 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({
     disabled = false,
     activeStyle,
     inactiveStyle,
+    customActiveUrl,
 }) => {
     const pathname = usePathname();
     const router = useRouter();
 
     const isActive = useMemo(() => {
+        const urlToMatch = customActiveUrl || to;
+
         switch (matchMode) {
             case 'exact':
-                return pathname === to;
+                return pathname === urlToMatch;
             case 'startsWith':
-                return pathname.startsWith(to);
+                return pathname.startsWith(urlToMatch);
             case 'includes':
             default:
-                return pathname.includes(to);
+                return pathname.includes(urlToMatch);
         }
-    }, [pathname, to, matchMode]);
+    }, [pathname, to, matchMode, customActiveUrl]);
 
     const renderChildren = useMemo(() => {
         if (typeof children === 'function') {
