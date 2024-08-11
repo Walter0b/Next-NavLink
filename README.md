@@ -1,6 +1,6 @@
 # Next-NavLink
 
-The `Next-NavLink` component is a customizable navigation link component for Next.js applications, i know there are a lot out there but just hear me out..this one is different. It allows you to easily create navigation links with active states, conditional classes,but wait there is more, with support for various matching modes to determine the active state.
+`Next-NavLink` is a customizable navigation link component for Next.js applications. I know what you're thinking: "Another NavLink component?" But hear me out... this one’s different. It lets you easily create navigation links with active states, conditional classes, and yes even support for different matching modes to determine the active state, among other features.
 
 ## Table of Contents
 
@@ -13,19 +13,17 @@ The `Next-NavLink` component is a customizable navigation link component for Nex
 
 ## Installation
 
-To use the `NavLink` component in your Next.js project, you can install it via npm:
-
 ```bash
 npm install next-navlink
 ```
 
-Or, if you're using yarn:
+Or, if you’re more of a yarn person:
 
 ```bash
 yarn add next-navlink
 ```
 
-Or, my favorite:
+Or, if you’re feeling adventurous:
 
 ```bash
 bun install next-navlink
@@ -33,7 +31,7 @@ bun install next-navlink
 
 ## Usage
 
-Here's a basic example of how to use the `NavLink` component in your Next.js project:
+Here's a basic example of how to use the NavLink component in your Next.js project:
 
 ```tsx
 import React from "react";
@@ -63,10 +61,6 @@ const Navbar = () => {
 export default Navbar;
 ```
 
-Sure, I can help you update the `README.md` to include the additional props `replace`, `scroll`, and `prefetch` for the `NavLink` component. Here's how these props can be incorporated into your component and the updated documentation for these features:
-
-### NavLink Component
-
 ## Props
 
 The `NavLink` component accepts the following props:
@@ -91,23 +85,13 @@ The `NavLink` component accepts the following props:
 | `disabled`          | `boolean`                                                     | If `true`, disables the link, preventing navigation and click events.                                                                                         | `false`      |
 | `activeStyle`       | `React.CSSProperties`                                         | An object containing inline styles to apply when the link is active.                                                                                          | -            |
 | `inactiveStyle`     | `React.CSSProperties`                                         | An object containing inline styles to apply when the link is inactive.                                                                                        | -            |
-| `customActiveUrl`     | `String`                                         | An The link will be considered active when the current pathname matches this URL.                                                                                        | -            |
-
-### Link Props
-
-The `replace`, `scroll`, and `prefetch` props correspond to the behavior of the Next.js `Link` component. For more information, see the [Next.js Link Component documentation](https://nextjs.org/docs/pages/api-reference/components/link).
-
-- **`replace`**: This prop controls whether the navigation should replace the current history entry instead of adding a new one. This is useful when you want to navigate within your app without adding a new entry to the browser's history stack.
-
-- **`scroll`**: This prop determines whether the page should scroll to the top when navigating to the new route. Setting it to `false` can be useful when you want to maintain scroll position between navigations.
-
-- **`prefetch`**: This prop enables prefetching the linked page in the background. Prefetching helps in improving navigation speed by loading the linked page ahead of time.
+| `customActiveUrl`   | `string`                                                      | The link will be considered active when the current pathname matches this URL.                                                                                | -            |
 
 ## Examples
 
-### Using the `replace`, `scroll`, and `prefetch` Props
+### Using `replace`, `scroll`, and `prefetch`
 
-Here's an example of how to use the new props with `NavLink`:
+Here’s how you can make the most of these props with `NavLink`:
 
 ```tsx
 <NavLink
@@ -122,23 +106,9 @@ Here's an example of how to use the new props with `NavLink`:
 </NavLink>
 ```
 
-- **`replace`**: This will replace the current history entry with `/about`, so pressing the back button won't go back to the current page.
-- **`scroll`**: This prevents the page from scrolling to the top when navigating to `/about`.
-- **`prefetch`**: This prefetches the `/about` page, improving the load time when the user clicks the link.
-
-### `matchMode` Options
-
-The `matchMode` prop controls how the active state is determined:
-
-- **`'exact'`**: The link is active only if the current pathname exactly matches the `to` path.
-- **`'includes'`**: The link is active if the `to` path is a substring of the current pathname (default).
-- **`'startsWith'`**: The link is active if the current pathname starts with the `to` path.
-
-## Examples
-
 ### Conditional Rendering
 
-The `NavLink` component supports conditional rendering of children based on the active state:
+Want to customize the link content based on whether it’s active? Here’s how:
 
 ```tsx
 <NavLink to="/profile" className="nav-link">
@@ -148,9 +118,23 @@ The `NavLink` component supports conditional rendering of children based on the 
 </NavLink>
 ```
 
+You even might want a link to be considered active based on a different URL than the one it actually points to.
+
+```tsx
+Copy code
+<NavLink
+  to="/profile/edit"
+  customActiveUrl="/profile"
+  activeClassName="active"
+  className="nav-link"
+>
+  Edit Profile
+</NavLink>
+```
+
 ### Styling Links
 
-You can easily style active and inactive links using the `activeClassName` and `inActiveClassName` props:
+You can style active and inactive links easily:
 
 ```tsx
 <NavLink
@@ -165,7 +149,7 @@ You can easily style active and inactive links using the `activeClassName` and `
 
 ### Disabling Redirection
 
-To disable redirection and render a `<span>` instead of a `<Link>`, set the `redirection` prop to `false`:
+Need a link that doesn’t actually navigate for some reasons? No problem:
 
 ```tsx
 <NavLink to="/settings" redirection={false} className="nav-link">
@@ -173,25 +157,11 @@ To disable redirection and render a `<span>` instead of a `<Link>`, set the `red
 </NavLink>
 ```
 
-### Handling Click Events
-
-You can handle click events by passing an `onClick` prop:
-
-```tsx
-<NavLink
-  to="/logout"
-  onClick={() => console.log("Logging out")}
-  className="nav-link"
->
-  Logout
-</NavLink>
-```
-
 ### Using `matchMode`
 
 #### Exact Match
 
-To ensure the link is active only when the URL matches exactly, use the `matchMode="exact"`:
+Want the link to be active only when the URL exactly matches? Use this:
 
 ```tsx
 <NavLink
@@ -204,11 +174,9 @@ To ensure the link is active only when the URL matches exactly, use the `matchMo
 </NavLink>
 ```
 
-- **Active** for `/log` only.
-
 #### Starts With Match
 
-To activate the link for any path that starts with the specified path, use `matchMode="startsWith"`:
+Make the link active for any path that starts with the specified path:
 
 ```tsx
 <NavLink
@@ -221,19 +189,15 @@ To activate the link for any path that starts with the specified path, use `matc
 </NavLink>
 ```
 
-- **Active** for paths like `/blog`, `/blog/post-1`, `/blog/categories`.
-
 #### Includes Match (Default)
 
-The default behavior is to match if the path is included as a substring. This is useful for broader matches:
+By default, `NavLink` matches if the path is included as a substring:
 
 ```tsx
 <NavLink to="/profile" activeClassName="active" className="nav-link">
   Profile
 </NavLink>
 ```
-
-- **Active** for `/profile`, `/profile/edit`, `/profile/settings`.
 
 ## Contributing
 
@@ -242,4 +206,3 @@ Contributions are welcome! If you have suggestions, bug reports, or feature requ
 ## License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-

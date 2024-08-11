@@ -1,6 +1,6 @@
 {
   "name": "next-navlink",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A customizable NavLink component for Next.js",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -39,8 +39,5 @@
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "next-auth": "^5.0.0-beta.20"
   }
 }
