@@ -2,7 +2,9 @@ import React, { useMemo, ReactElement, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-
+/**
+ * Props for the NavLink component.
+ */
 interface NavLinkProps {
     children: React.ReactNode | ((isActive: boolean) => React.ReactNode);
     activeClassName?: string;
@@ -25,6 +27,32 @@ interface NavLinkProps {
     customActiveUrl?: string;
 }
 
+/**
+ * NavLink component for Next.js navigation with active state detection and external link support.
+ *
+ * @param {Object} props - Props for NavLink component.
+ * @param {React.ReactNode | function} props.children - The content of the link. Can be a function that takes `isActive` boolean.
+ * @param {string} [props.activeClassName='active'] - CSS class applied when the link is active.
+ * @param {string} [props.inActiveClassName=''] - CSS class applied when the link is inactive.
+ * @param {string} [props.className=''] - Additional CSS class applied to the link.
+ * @param {string} props.to - The destination URL or path.
+ * @param {boolean} [props.redirection=true] - Determines if redirection should occur on click.
+ * @param {string} [props.id] - Unique identifier for the link element.
+ * @param {function} [props.onClick] - Optional click event handler.
+ * @param {'exact' | 'includes' | 'startsWith'} [props.matchMode='includes'] - The matching mode for active state detection.
+ * @param {boolean} [props.replace=false] - Whether to replace the current history entry.
+ * @param {boolean} [props.scroll=true] - Scrolls to the top of the page after navigation.
+ * @param {boolean} [props.prefetch=true] - Prefetch the page in the background.
+ * @param {boolean} [props.isExternal=false] - Marks the link as an external link.
+ * @param {Object} [props.aria] - ARIA attributes for accessibility.
+ * @param {string} [props.testId] - Data attribute for easier testing.
+ * @param {boolean} [props.disabled=false] - Disables the link.
+ * @param {React.CSSProperties} [props.activeStyle] - Inline styles applied when the link is active.
+ * @param {React.CSSProperties} [props.inactiveStyle] - Inline styles applied when the link is inactive.
+ * @param {string} [props.customActiveUrl] - Custom URL to match as active instead of the `to` prop.
+ *
+ * @returns {JSX.Element} The rendered NavLink component.
+ */
 const NavLink: React.FC<NavLinkProps> = React.memo(({
     to,
     redirection = true,
