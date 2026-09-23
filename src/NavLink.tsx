@@ -1,159 +1,176 @@
-import React, { useMemo, ReactElement, useCallback } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link.js';
+import {
+    forwardRef,
+    type AnchorHTMLAttributes,
+    type ComponentProps,
+    type CSSProperties,
+    type MouseEvent,
+    type ReactNode,
+    type Ref,
+} from 'react';
+import { isExternalUrl, isWebUrl, type MatchMode } from './match';
+import { useIsActive } from './useIsActive';
+
+/** Follows the installed Next.js version: `boolean | null` up to 14, plus `'auto'` from 15. */
+type LinkPrefetch = ComponentProps<typeof Link>['prefetch'];
 
 /**
  * Props for the NavLink component.
+ *
+ * Every other `<a>` attribute (`title`, `target`, `data-*`, `aria-*`, event handlers...) is
+ * forwarded to the rendered element.
  */
-interface NavLinkProps {
-    children: React.ReactNode | ((isActive: boolean) => React.ReactNode);
-    activeClassName?: string;
-    inActiveClassName?: string;
-    className?: string;
+export interface NavLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children' | 'onClick'> {
+    /**
+     * Destination: an internal path (`/about`) or an absolute URL (`https://example.com`).
+     * Absolute URLs are treated as external links automatically.
+     */
     to: string;
-    redirection?: boolean;
-    id?: string;
-    onClick?: () => void;
-    matchMode?: 'exact' | 'includes' | 'startsWith';
-    replace?: boolean;
-    scroll?: boolean;
-    prefetch?: boolean;
-    isExternal?: boolean;
-    aria?: { [key: string]: string };
-    testId?: string;
-    disabled?: boolean;
-    activeStyle?: React.CSSProperties;
-    inactiveStyle?: React.CSSProperties;
+    /** Link content. Can be a function receiving the active state. */
+    children: ReactNode | ((isActive: boolean) => ReactNode);
+    /** Class applied when the link is active. @default 'active' */
+    activeClassName?: string;
+    /** Class applied when the link is not active. */
+    inactiveClassName?: string;
+    /** @deprecated Use `inactiveClassName`. */
+    inActiveClassName?: string;
+    /** Inline styles applied when the link is active (merged over `style`). */
+    activeStyle?: CSSProperties;
+    /** Inline styles applied when the link is not active (merged over `style`). */
+    inactiveStyle?: CSSProperties;
+    /** How the current pathname is compared with `to`. @default 'includes' */
+    matchMode?: MatchMode;
+    /** Match the current pathname against this URL instead of `to`. */
     customActiveUrl?: string;
+    /** When `false`, renders a `<span>` and does not navigate. @default true */
+    redirection?: boolean;
+    /** Renders a non-interactive `<span aria-disabled="true">`; `onClick` is not called. @default false */
+    disabled?: boolean;
+    /**
+     * Force (`true`) or prevent (`false`) external-link behavior: a plain `<a>` opening in a new tab
+     * with `rel="noopener noreferrer"`. Detected from `to` when omitted.
+     */
+    isExternal?: boolean;
+    /** Replace the current history entry instead of pushing a new one. */
+    replace?: boolean;
+    /** Scroll to the top of the page after navigation. Follows Next.js' default (`true`). */
+    scroll?: boolean;
+    /** Forwarded to `next/link`. Follows Next.js' default when omitted. */
+    prefetch?: LinkPrefetch;
+    /**
+     * Click handler. Call `event.preventDefault()` to cancel the navigation.
+     * Not called when `disabled`.
+     */
+    onClick?: (event: MouseEvent<HTMLElement>) => void;
+    /** ARIA attributes, e.g. `{ 'aria-label': 'Home' }`. You can also pass `aria-*` props directly. */
+    aria?: Record<string, string>;
+    /** Sets `data-testid`. */
+    testId?: string;
 }
 
+const mergeTokens = (...lists: (string | undefined)[]): string =>
+    Array.from(new Set(lists.join(' ').split(/\s+/).filter(Boolean))).join(' ');
+
 /**
- * NavLink component for Next.js navigation with active state detection and external link support.
+ * `next/link` with active-state detection.
  *
- * @param {Object} props - Props for NavLink component.
- * @param {React.ReactNode | function} props.children - The content of the link. Can be a function that takes `isActive` boolean.
- * @param {string} [props.activeClassName='active'] - CSS class applied when the link is active.
- * @param {string} [props.inActiveClassName=''] - CSS class applied when the link is inactive.
- * @param {string} [props.className=''] - Additional CSS class applied to the link.
- * @param {string} props.to - The destination URL or path.
- * @param {boolean} [props.redirection=true] - Determines if redirection should occur on click.
- * @param {string} [props.id] - Unique identifier for the link element.
- * @param {function} [props.onClick] - Optional click event handler.
- * @param {'exact' | 'includes' | 'startsWith'} [props.matchMode='includes'] - The matching mode for active state detection.
- * @param {boolean} [props.replace=false] - Whether to replace the current history entry.
- * @param {boolean} [props.scroll=true] - Scrolls to the top of the page after navigation.
- * @param {boolean} [props.prefetch=true] - Prefetch the page in the background.
- * @param {boolean} [props.isExternal=false] - Marks the link as an external link.
- * @param {Object} [props.aria] - ARIA attributes for accessibility.
- * @param {string} [props.testId] - Data attribute for easier testing.
- * @param {boolean} [props.disabled=false] - Disables the link.
- * @param {React.CSSProperties} [props.activeStyle] - Inline styles applied when the link is active.
- * @param {React.CSSProperties} [props.inactiveStyle] - Inline styles applied when the link is inactive.
- * @param {string} [props.customActiveUrl] - Custom URL to match as active instead of the `to` prop.
+ * Renders a `next/link` (or a plain `<a>` for external URLs, or a `<span>` when `disabled` /
+ * `redirection={false}`), adds `activeClassName` / `activeStyle` when the current path matches
+ * and sets `aria-current="page"` on the active link.
  *
- * @returns {JSX.Element} The rendered NavLink component.
+ * The ref points to the rendered element: an `<a>` most of the time, a `<span>` when
+ * disabled or `redirection={false}`.
+ *
+ * @example
+ * <NavLink to="/blog" matchMode="startsWith" activeClassName="font-bold">Blog</NavLink>
  */
-const NavLink: React.FC<NavLinkProps> = React.memo(({
-    to,
-    redirection = true,
-    id,
-    children,
-    inActiveClassName = '',
-    className = '',
-    activeClassName = 'active',
-    onClick,
-    matchMode = 'includes',
-    replace = false,
-    scroll = true,
-    prefetch = true,
-    isExternal = false,
-    aria = {},
-    testId,
-    disabled = false,
-    activeStyle,
-    inactiveStyle,
-    customActiveUrl,
-}) => {
-    const pathname = usePathname();
-    const router = useRouter();
+const NavLink = forwardRef<HTMLElement, NavLinkProps>(function NavLink(
+    {
+        to,
+        children,
+        className,
+        style,
+        id,
+        onClick,
+        activeClassName = 'active',
+        inactiveClassName,
+        inActiveClassName,
+        activeStyle,
+        inactiveStyle,
+        matchMode,
+        customActiveUrl,
+        redirection = true,
+        disabled = false,
+        isExternal,
+        replace,
+        scroll,
+        prefetch,
+        aria,
+        testId,
+        ...rest
+    },
+    ref,
+) {
+    const isActive = useIsActive(to, { matchMode, customActiveUrl });
+    const external = isExternal ?? isExternalUrl(to);
 
-    const isActive = useMemo(() => {
-        const urlToMatch = customActiveUrl || to;
-
-        switch (matchMode) {
-            case 'exact':
-                return pathname === urlToMatch;
-            case 'startsWith':
-                return pathname.startsWith(urlToMatch);
-            case 'includes':
-            default:
-                return pathname.includes(urlToMatch);
-        }
-    }, [pathname, to, matchMode, customActiveUrl]);
-
-    const renderChildren = useMemo(() => {
-        if (typeof children === 'function') {
-            return children(isActive);
-        }
-        if (React.isValidElement(children)) {
-            return React.cloneElement(children as ReactElement<{ isActive?: boolean }>, { isActive });
-        }
-        return children;
-    }, [children, isActive]);
-
-    const handleClick = useCallback((e: React.MouseEvent) => {
-        if (disabled) {
-            e.preventDefault();
-            return;
-        }
-        if (onClick) {
-            onClick();
-        }
-        if (!isExternal && redirection) {
-            e.preventDefault();
-            if (replace) {
-                router.replace(to);
-            } else {
-                router.push(to);
-            }
-        }
-    }, [disabled, onClick, isExternal, redirection, router, to, replace]);
+    const stateStyle = isActive ? activeStyle : inactiveStyle;
 
     const commonProps = {
-        id,
-        className: `${className} ${isActive ? activeClassName : inActiveClassName} nav_links`.trim(),
-        onClick: handleClick,
-        style: isActive ? activeStyle : inactiveStyle,
-        'data-testid': testId,
-        'aria-disabled': disabled,
+        'aria-current': isActive ? ('page' as const) : undefined,
+        'aria-disabled': disabled || undefined,
         ...aria,
+        ...rest,
+        id,
+        // `nav_links` is a stable hook for global CSS, kept from 1.x.
+        className: [className, isActive ? activeClassName : inactiveClassName ?? inActiveClassName, 'nav_links']
+            .filter(Boolean)
+            .join(' '),
+        style: style || stateStyle ? { ...style, ...stateStyle } : undefined,
+        onClick: (event: MouseEvent<HTMLElement>) => {
+            if (disabled) {
+                event.preventDefault();
+                return;
+            }
+            onClick?.(event);
+        },
+        ...(testId !== undefined && { 'data-testid': testId }),
     };
 
+    const content = typeof children === 'function' ? children(isActive) : children;
+
     if (!redirection || disabled) {
-        return <span {...commonProps}>{renderChildren}</span>;
+        return (
+            <span ref={ref as Ref<HTMLSpanElement>} {...commonProps}>
+                {content}
+            </span>
+        );
     }
 
-    if (isExternal) {
+    if (external) {
+        const target = rest.target ?? (isExternal === true || isWebUrl(to) ? '_blank' : undefined);
+        const rel = target === '_blank' ? mergeTokens('noopener noreferrer', rest.rel) : rest.rel;
+
         return (
-            <a href={to} target="_blank" rel="noopener noreferrer" {...commonProps}>
-                {renderChildren}
+            <a ref={ref as Ref<HTMLAnchorElement>} href={to} {...commonProps} target={target} rel={rel}>
+                {content}
             </a>
         );
     }
 
     return (
         <Link
+            ref={ref as Ref<HTMLAnchorElement>}
             href={to}
             replace={replace}
             scroll={scroll}
             prefetch={prefetch}
             {...commonProps}
         >
-            {renderChildren}
+            {content}
         </Link>
     );
 });
 
-NavLink.displayName = 'NavLink';
-
 export default NavLink;
+export { NavLink };

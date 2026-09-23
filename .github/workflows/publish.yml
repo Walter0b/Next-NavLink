@@ -1,46 +1,56 @@
-name: Publish to npm
+name: Publish
 
+# Releases are cut from tags: `npm version <patch|minor|major>` then `git push --follow-tags`.
 on:
   push:
-    branches:
-      - main
+    tags: ["v*"]
+
+permissions:
+  contents: write # create the GitHub release
+  id-token: write # npm provenance
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16" 
-      - name: Install dependencies
-        run: npm install
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
 
-      - name: Run tests
-        run: npm test # Ensure your tests pass before publishing
+      - name: Check that the tag matches package.json
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
 
-      - name: Bump version, build, and publish
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - run: npm run build
+
+      - run: npm run check:package
+
+      - name: Publish to npm
+        run: |
+          tag=latest
+          case "$GITHUB_REF_NAME" in *-*) tag=next ;; esac # pre-releases (v2.1.0-beta.1) go to `next`
+          npm publish --provenance --access public --tag "$tag"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create the GitHub release
         run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git add .
-          git commit -m "Commit changes before version bump" || echo "No changes to commit"
-          npm version patch # Or use 'minor' or 'major' depending on your versioning strategy
-          npm run build # If you have a build step
-          npm publish
-          git push --follow-tags
-          
-      - name: Push changes
+          flags=""
+          case "$GITHUB_REF_NAME" in *-*) flags="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --generate-notes $flags
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git push --follow-tags
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

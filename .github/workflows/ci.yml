@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (Next ${{ matrix.next }}, React ${{ matrix.react }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { next: "13.5", react: "18", types: "18" }
+          - { next: "14", react: "18", types: "18" }
+          - { next: "15", react: "19", types: "19" }
+          - { next: "16", react: "19", types: "19" }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Next ${{ matrix.next }} and React ${{ matrix.react }}
+        run: >
+          npm install --no-save
+          next@${{ matrix.next }}
+          react@${{ matrix.react }}
+          react-dom@${{ matrix.react }}
+          @types/react@${{ matrix.types }}
+          @types/react-dom@${{ matrix.types }}
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+  package:
+    name: Build and package checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npm run check:package
