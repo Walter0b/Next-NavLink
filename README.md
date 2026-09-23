@@ -4,14 +4,16 @@
 [![CI](https://github.com/Walter0b/Next-NavLink/actions/workflows/ci.yml/badge.svg)](https://github.com/Walter0b/Next-NavLink/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-`Next-NavLink` is a navigation link component for Next.js. I know what you're thinking: "Another NavLink component?" But hear me out... it's a thin layer over `next/link` that knows whether it points at the current page, so you can style it, label it for screen readers and react to it, with a few matching modes to decide what "current" means.
+`next-navlink` adds active states to Next.js links. Choose how a URL matches the current page, apply classes or styles, and render different content when a link is active. Navigation stays with `next/link`.
+
+Next.js [shows how to build active links with `usePathname`](https://nextjs.org/docs/app/api-reference/components/link#checking-active-links). This package turns that pattern into a reusable component with matching modes, accessibility attributes and external-link handling.
 
 - **Active state** with three match modes, custom class names and inline styles, plus `aria-current="page"`.
 - **Built on `next/link`**: prefetching, client-side navigation, `replace`, `scroll`, and correct Cmd/Ctrl/Shift-click behavior.
 - **External links** detected automatically (new tab, `rel="noopener noreferrer"`).
-- **`disabled` links**, function-as-children, `ref` forwarding, and every `<a>` attribute passed through.
-- **Works everywhere in the App Router**, including Server Components (the package ships with the `"use client"` directive).
-- Typed, tiny (about 1.4 kB gzipped), ESM + CJS.
+- **`disabled` links**, function-as-children, `ref` forwarding, and standard anchor attributes.
+- **Import from Server Components**: the package ships with the `"use client"` directive.
+- Written in TypeScript, with ESM and CommonJS builds and no bundled React or Next.js runtime.
 
 ## Table of Contents
 
@@ -25,7 +27,6 @@
 - [Server and Client Components](#server-and-client-components)
 - [Accessibility](#accessibility)
 - [Migrating from 1.x](#migrating-from-1x)
-- [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -35,15 +36,11 @@
 npm install next-navlink
 ```
 
-Or, if you're more of a yarn person:
+Or use your preferred package manager:
 
 ```bash
 yarn add next-navlink
-```
-
-Or, if you're feeling adventurous:
-
-```bash
+pnpm add next-navlink
 bun add next-navlink
 ```
 
@@ -93,11 +90,11 @@ The component is available as a default export and as a named export: `import Na
 
 The unit tests run against Next 13.5, 14, 15 and 16 in CI, and the built package is checked with [publint](https://publint.dev) and [Are the types wrong?](https://arethetypeswrong.github.io).
 
-It relies on `usePathname` from `next/navigation`, so it works in the App Router and, since Next 13, in the Pages Router too.
+It uses `usePathname` from `next/navigation` in both the App Router and Pages Router. When the Pages Router has not initialized yet, links stay inactive until the pathname is available. Use the Node.js version required by your installed Next.js version.
 
 ## Props
 
-Any other prop is forwarded to the rendered element (`title`, `target`, `rel`, `data-*`, `aria-*`, `onMouseEnter`, `style`...).
+Standard anchor attributes and event handlers are forwarded (`title`, `target`, `rel`, `data-*`, `aria-*`, `onMouseEnter`, `style`...). Anchor-only attributes such as `target`, `rel` and `download` are omitted when rendering a `<span>`.
 
 | Prop                | Type                                                              | Default      | Description                                                                                                                                                  |
 | ------------------- | ----------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -149,7 +146,9 @@ Given `to="/blog"`:
 Two rules apply to every mode:
 
 - A link to the root (`to="/"`) is only active on `/` itself. Otherwise your "Home" link would light up on every page.
-- External URLs are never active.
+- An external URL used as the matching target is never active. An explicit `customActiveUrl="/path"` can still give an external link an active state; `isExternal` controls rendering and navigation, not matching.
+
+Use paths starting with `/` for predictable matching. Relative destinations such as `../settings` are passed to Next.js for navigation but are not resolved against the current route for active-state matching. Query-only and hash-only destinations are inactive unless you provide `customActiveUrl`.
 
 ## Examples
 
@@ -207,6 +206,7 @@ Absolute URLs are detected. They open in a new tab with `rel="noopener noreferre
 
 ```tsx
 <NavLink to="https://nextjs.org">Next.js</NavLink>
+<NavLink to="https://nextjs.org" target="_self">Next.js in this tab</NavLink>
 <NavLink to="mailto:hello@example.com">Say hello</NavLink>
 <NavLink to="/docs" isExternal>Docs (served by another app)</NavLink>
 ```
@@ -215,8 +215,10 @@ Absolute URLs are detected. They open in a new tab with `rel="noopener noreferre
 
 ```tsx
 <NavLink to="/billing" disabled>Billing</NavLink>
-<NavLink to="/settings" redirection={false} onClick={() => openSettingsModal()}>Settings</NavLink>
+<NavLink to="/settings" redirection={false}>Settings (label only)</NavLink>
 ```
+
+`redirection={false}` renders a `<span>`. It still accepts `onClick`, but has no built-in keyboard interaction. Use a `<button type="button">` for actions such as opening a modal.
 
 ### Cancel a navigation
 
@@ -264,10 +266,16 @@ It takes the same `matchMode` and `customActiveUrl` options as the component.
 
 Props sent from a Server Component to a Client Component have to be serializable. Plain values and style objects are fine; **functions are not**. So `onClick` and the function form of `children` only work when `NavLink` is rendered from a Client Component (a file starting with `"use client"`).
 
+The same rendering constraints as [`usePathname`](https://nextjs.org/docs/app/api-reference/functions/use-pathname) apply:
+
+- With Next.js Cache Components and dynamic parameters that are unknown during prerendering, wrap the navigation in `<Suspense>` with a fallback.
+- Rewrites can make the server pathname differ from the browser pathname. In those routes, render a stable fallback until mount before showing pathname-dependent navigation to avoid hydration mismatches. This package does not defer active-state matching automatically.
+
 ## Accessibility
 
 - The active link gets `aria-current="page"`. Override it with your own `aria-current` prop if the link means something else (`"location"`, `"step"`...).
-- Disabled links render `<span aria-disabled="true">`: not focusable and not announced as links. Target them in CSS with `[aria-disabled="true"]`.
+- Disabled links render `<span aria-disabled="true" tabindex="-1">` and ignore `onClick`. The disabled state takes precedence over a supplied `aria-disabled` or `tabIndex`. They are removed from sequential keyboard navigation; keep their children non-interactive.
+- External web links open in a new tab by default. Indicate that in the link text when useful, or pass `target="_self"` to stay in the current tab.
 - Cmd/Ctrl/Shift-click, middle-click and "open in new tab" work as usual because navigation is left to `next/link`.
 
 ## Migrating from 1.x
@@ -288,34 +296,9 @@ Version 2 is mostly a bug-fix release, but it changes a few behaviors, hence the
 
 Nothing changes for the props themselves: every 1.x prop still exists (`inActiveClassName` is deprecated in favor of `inactiveClassName`).
 
-## Development
-
-```bash
-npm install
-npm test               # unit tests (Vitest + Testing Library)
-npm run typecheck      # tsc --noEmit
-npm run build          # tsup -> dist/ (ESM, CJS and type declarations)
-npm run check:package  # build output sanity checks, publint, Are the types wrong?
-```
-
-To try another Next.js / React version locally, the same way CI does:
-
-```bash
-npm install --no-save next@14 react@18 react-dom@18 @types/react@18 @types/react-dom@18
-npm run typecheck && npm test
-```
-
-### Releasing
-
-1. Update [CHANGELOG.md](./CHANGELOG.md).
-2. `npm version <patch|minor|major>` bumps `package.json`, commits and tags `vX.Y.Z`.
-3. `git push --follow-tags`.
-
-The [publish workflow](./.github/workflows/publish.yml) runs on the tag: it checks that the tag matches `package.json`, runs the tests, publishes to npm with provenance (pre-release versions such as `2.1.0-beta.1` go to the `next` dist-tag) and creates the GitHub release. It needs an `NPM_TOKEN` repository secret.
-
 ## Contributing
 
-Contributions are welcome! If you have suggestions, bug reports, or feature requests, feel free to open an issue or submit a pull request. Please run `npm test` and `npm run typecheck` first, and add a test with your change.
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, checks and release instructions.
 
 ## License
 

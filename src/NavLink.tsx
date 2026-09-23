@@ -17,8 +17,8 @@ type LinkPrefetch = ComponentProps<typeof Link>['prefetch'];
 /**
  * Props for the NavLink component.
  *
- * Every other `<a>` attribute (`title`, `target`, `data-*`, `aria-*`, event handlers...) is
- * forwarded to the rendered element.
+ * Other `<a>` attributes (`title`, `target`, `data-*`, `aria-*`, event handlers...) are
+ * forwarded. Anchor-only attributes are omitted when rendering a span.
  */
 export interface NavLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children' | 'onClick'> {
     /**
@@ -107,6 +107,14 @@ const NavLink = forwardRef<HTMLElement, NavLinkProps>(function NavLink(
         prefetch,
         aria,
         testId,
+        target,
+        rel,
+        download,
+        hrefLang,
+        media,
+        ping,
+        referrerPolicy,
+        type,
         ...rest
     },
     ref,
@@ -118,9 +126,9 @@ const NavLink = forwardRef<HTMLElement, NavLinkProps>(function NavLink(
 
     const commonProps = {
         'aria-current': isActive ? ('page' as const) : undefined,
-        'aria-disabled': disabled || undefined,
         ...aria,
         ...rest,
+        ...(disabled && { 'aria-disabled': true as const, tabIndex: -1 }),
         id,
         // `nav_links` is a stable hook for global CSS, kept from 1.x.
         className: [className, isActive ? activeClassName : inactiveClassName ?? inActiveClassName, 'nav_links']
@@ -147,12 +155,14 @@ const NavLink = forwardRef<HTMLElement, NavLinkProps>(function NavLink(
         );
     }
 
+    const anchorProps = { target, rel, download, hrefLang, media, ping, referrerPolicy, type };
+
     if (external) {
-        const target = rest.target ?? (isExternal === true || isWebUrl(to) ? '_blank' : undefined);
-        const rel = target === '_blank' ? mergeTokens('noopener noreferrer', rest.rel) : rest.rel;
+        const externalTarget = target ?? (isExternal === true || isWebUrl(to) ? '_blank' : undefined);
+        const externalRel = externalTarget?.toLowerCase() === '_blank' ? mergeTokens('noopener noreferrer', rel) : rel;
 
         return (
-            <a ref={ref as Ref<HTMLAnchorElement>} href={to} {...commonProps} target={target} rel={rel}>
+            <a ref={ref as Ref<HTMLAnchorElement>} href={to} {...commonProps} {...anchorProps} target={externalTarget} rel={externalRel}>
                 {content}
             </a>
         );
@@ -166,6 +176,7 @@ const NavLink = forwardRef<HTMLElement, NavLinkProps>(function NavLink(
             scroll={scroll}
             prefetch={prefetch}
             {...commonProps}
+            {...anchorProps}
         >
             {content}
         </Link>

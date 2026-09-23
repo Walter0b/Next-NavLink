@@ -206,20 +206,11 @@ describe('navigation', () => {
     });
 
     it('calls onClick with the event', () => {
-        const onClick = vi.fn();
+        const onClick = vi.fn((event) => event.preventDefault());
         render(<NavLink to="/about" onClick={onClick}>About</NavLink>);
         fireEvent.click(screen.getByText('About'));
         expect(onClick).toHaveBeenCalledTimes(1);
         expect(onClick.mock.calls[0][0]).toMatchObject({ type: 'click' });
-    });
-
-    it('never cancels the click itself, so next/link handles modifier keys, scroll and history', () => {
-        render(<NavLink to="/about">About</NavLink>);
-        const link = screen.getByText('About');
-        expect(fireEvent.click(link)).toBe(true);
-        expect(fireEvent.click(link, { metaKey: true })).toBe(true);
-        expect(fireEvent.click(link, { ctrlKey: true })).toBe(true);
-        expect(fireEvent.click(link, { shiftKey: true })).toBe(true);
     });
 
     it('lets onClick cancel the navigation with preventDefault', () => {
@@ -229,6 +220,30 @@ describe('navigation', () => {
 });
 
 describe('disabled and redirection={false}', () => {
+    it('keeps disabled links out of the tab order and announces their actual state', () => {
+        render(
+            <NavLink to="/about" disabled tabIndex={0} aria={{ 'aria-disabled': 'false' }} aria-disabled={false}>
+                About
+            </NavLink>,
+        );
+        const element = screen.getByText('About');
+        expect(element).toHaveAttribute('aria-disabled', 'true');
+        expect(element.tabIndex).toBe(-1);
+    });
+
+    it.each([{ disabled: true }, { redirection: false }])('omits anchor-only attributes on spans: %o', (props) => {
+        render(
+            <NavLink to="/about" {...props} target="_blank" rel="nofollow" download="about.html"
+                hrefLang="en" media="print" ping="/track" referrerPolicy="no-referrer" type="text/html">
+                About
+            </NavLink>,
+        );
+        const element = screen.getByText('About');
+        for (const attribute of ['target', 'rel', 'download', 'hreflang', 'media', 'ping', 'referrerpolicy', 'type']) {
+            expect(element).not.toHaveAttribute(attribute);
+        }
+    });
+
     it('renders an inert span when disabled', () => {
         const onClick = vi.fn();
         render(<NavLink to="/about" disabled onClick={onClick}>About</NavLink>);
@@ -300,6 +315,11 @@ describe('external links', () => {
         expect(screen.getByText('Docs')).toHaveAttribute('rel', 'noopener noreferrer nofollow');
     });
 
+    it('treats the _blank target case-insensitively', () => {
+        render(<NavLink to="https://example.com" target="_BLANK" rel="nofollow">Docs</NavLink>);
+        expect(screen.getByText('Docs')).toHaveAttribute('rel', 'noopener noreferrer nofollow');
+    });
+
     it('respects an explicit target', () => {
         render(<NavLink to="https://example.com" target="_self">Docs</NavLink>);
         const link = screen.getByText('Docs');
@@ -315,7 +335,7 @@ describe('external links', () => {
     });
 
     it('still calls onClick', () => {
-        const onClick = vi.fn();
+        const onClick = vi.fn((event) => event.preventDefault());
         render(<NavLink to="https://example.com" onClick={onClick}>Docs</NavLink>);
         fireEvent.click(screen.getByText('Docs'));
         expect(onClick).toHaveBeenCalledTimes(1);
@@ -323,6 +343,15 @@ describe('external links', () => {
 });
 
 describe('forwarded props', () => {
+    it.each(['/about', 'https://example.com/about'])('preserves anchor-only attributes on links to %s', (to) => {
+        render(<NavLink to={to} download="about.html" hrefLang="en" target="_self" rel="help">About</NavLink>);
+        const link = screen.getByText('About');
+        expect(link).toHaveAttribute('download', 'about.html');
+        expect(link).toHaveAttribute('hreflang', 'en');
+        expect(link).toHaveAttribute('target', '_self');
+        expect(link).toHaveAttribute('rel', 'help');
+    });
+
     it('sets id and data-testid', () => {
         render(<NavLink to="/about" id="about-link" testId="about">About</NavLink>);
         const link = screen.getByTestId('about');

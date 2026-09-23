@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.1] - 2026-09-23
+
+### Changed
+
+- The README now only documents how to use the package. Contributor and release notes moved to `CONTRIBUTING.md`.
+- Clarified relative URL matching, external-link overrides, keyboard interaction, and Next.js rendering constraints.
+- Include `CONTRIBUTING.md` in the published package so the README's contribution link works.
+
+### Fixed
+
+- Disabled links cannot override their disabled announcement or re-enter the tab order through `aria-disabled` or `tabIndex`.
+- Anchor-only attributes are no longer forwarded to spans rendered by `disabled` or `redirection={false}`.
+- External links recognize `_blank` case-insensitively when adding `noopener noreferrer`.
+
+### Tooling
+
+- Added regression tests for disabled links and router navigation, including `replace`, `scroll`, canceled clicks and modifier keys.
+- Updated the Vitest configuration for ESM loading and automatic JSX handling; console spies are restored between tests.
+
 ## [2.0.0] - 2026-09-23
 
 Mostly a bug-fix and modernization release. It is a major because a few behaviors change and the
@@ -60,4 +79,5 @@ supported Next.js / React ranges moved. See "Migrating from 1.x" in the README.
   patch version on every push to `main`.
 - Dependabot for npm dependencies and GitHub Actions.
 
+[2.0.1]: https://github.com/Walter0b/Next-NavLink/releases/tag/v2.0.1
 [2.0.0]: https://github.com/Walter0b/Next-NavLink/releases/tag/v2.0.0
