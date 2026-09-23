@@ -1,6 +1,6 @@
 {
   "name": "next-navlink",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A NavLink component for Next.js: active-state detection, match modes, external links and accessibility support.",
   "keywords": [
     "nextjs",
