@@ -1,7 +1,7 @@
 # Next-NavLink
 
 [![npm version](https://img.shields.io/npm/v/next-navlink.svg)](https://www.npmjs.com/package/next-navlink)
-[![CI](https://github.com/Walter0b/Nextjs-NavLink/actions/workflows/ci.yml/badge.svg)](https://github.com/Walter0b/Nextjs-NavLink/actions/workflows/ci.yml)
+[![CI](https://github.com/Walter0b/Next-NavLink/actions/workflows/ci.yml/badge.svg)](https://github.com/Walter0b/Next-NavLink/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 `Next-NavLink` is a navigation link component for Next.js. I know what you're thinking: "Another NavLink component?" But hear me out... it's a thin layer over `next/link` that knows whether it points at the current page, so you can style it, label it for screen readers and react to it, with a few matching modes to decide what "current" means.
@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <NavLink to="/about" matchMode="exact" className="nav-link">
             About
           </NavLink>
-          <NavLink to="https://github.com/Walter0b/Nextjs-NavLink">GitHub</NavLink>
+          <NavLink to="https://github.com/Walter0b/Next-NavLink">GitHub</NavLink>
         </nav>
         {children}
       </body>

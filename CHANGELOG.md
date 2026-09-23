@@ -60,4 +60,4 @@ supported Next.js / React ranges moved. See "Migrating from 1.x" in the README.
   patch version on every push to `main`.
 - Dependabot for npm dependencies and GitHub Actions.
 
-[2.0.0]: https://github.com/Walter0b/Nextjs-NavLink/releases/tag/v2.0.0
+[2.0.0]: https://github.com/Walter0b/Next-NavLink/releases/tag/v2.0.0

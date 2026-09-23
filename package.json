@@ -13,13 +13,13 @@
     "link",
     "app-router"
   ],
-  "homepage": "https://github.com/Walter0b/Nextjs-NavLink#readme",
+  "homepage": "https://github.com/Walter0b/Next-NavLink#readme",
   "bugs": {
-    "url": "https://github.com/Walter0b/Nextjs-NavLink/issues"
+    "url": "https://github.com/Walter0b/Next-NavLink/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Walter0b/Nextjs-NavLink.git"
+    "url": "git+https://github.com/Walter0b/Next-NavLink.git"
   },
   "license": "MIT",
   "author": "WalterOb",
